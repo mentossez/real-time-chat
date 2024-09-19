@@ -46,10 +46,12 @@ export class UserManager {
    broadcast(roomId: string, userId: string, message: OutGoingMessage) {
       const room = this.rooms.get(roomId);
       if (!room) {
+         console.log("Room not found");
          return;
       }
       const user = this.getUser(userId, roomId);
       if (!user) {
+         console.log("User not found");
          return;
       }
       room.users.forEach(user => {

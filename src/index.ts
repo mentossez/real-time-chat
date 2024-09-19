@@ -1,5 +1,8 @@
-import { server as WebSocketServer, request as WebSocketRequest, connection as WebSocketConnection } from 'websocket';
+import { server as WebSocketServer, request as WebSocketRequest, connection as WebSocketConnection, connection } from 'websocket';
 import * as http from 'http';
+import { IncomingMessage, SupportedMessage } from './messages/incomingMessages';
+import { UserManager } from './store/UserManager';
+import { InMemoryStore } from './InMemoryStore';
 
 const server = http.createServer((request: any, response: any) => {
    console.log(`${new Date()} Received request for ${request.url}`);
@@ -16,14 +19,15 @@ const wsServer = new WebSocketServer({
    autoAcceptConnections: false
 });
 
+const userManager = new UserManager();
+const inMemoryStore = new InMemoryStore();
+
 function originIsAllowed(origin: string): boolean {
-   // put logic here to detect whether the specified origin is allowed.
    return true;
 }
 
 wsServer.on('request', (request: WebSocketRequest) => {
    if (!originIsAllowed(request.origin)) {
-      // Make sure we only accept requests from an allowed origin
       request.reject();
       console.log(`${new Date()} Connection from origin ${request.origin} rejected.`);
       return;
@@ -34,11 +38,7 @@ wsServer.on('request', (request: WebSocketRequest) => {
 
    connection.on('message', (message: any) => {
       if (message.type === 'utf8') {
-         console.log(`Received Message: ${message.utf8Data}`);
-         connection.sendUTF(message.utf8Data);
-      } else if (message.type === 'binary') {
-         console.log(`Received Binary Message of ${message.binaryData.length} bytes`);
-         connection.sendBytes(message.binaryData);
+         messageHandler(message.utf8Data, connection);
       }
    });
 
@@ -46,3 +46,23 @@ wsServer.on('request', (request: WebSocketRequest) => {
       console.log(`${new Date()} Peer ${connection.remoteAddress} disconnected.`);
    });
 });
+
+function messageHandler(message: IncomingMessage, connection: connection) {
+   if (message.type === SupportedMessage.JoinRoom) {
+      const payload = message.payload;
+      userManager.addUser(payload.name, payload.userId, payload.roomId, connection);
+   }
+   if (message.type === SupportedMessage.SendMessage) {
+      const payload = message.payload;
+      const user = userManager.getUser(payload.userId, payload.roomId);
+      if (!user) {
+         console.log("User not found in db");
+         return;
+      }
+      inMemoryStore.addChat(payload.roomId, payload.userId, user.name, payload.message);
+   }
+   if (message.type === SupportedMessage.UpvoteMessage) {
+      const payload = message.payload;
+      inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
+   }
+}
