@@ -1,8 +1,10 @@
 import { server as WebSocketServer, request as WebSocketRequest, connection as WebSocketConnection, connection } from 'websocket';
 import * as http from 'http';
 import { IncomingMessage, SupportedMessage } from './messages/incomingMessages';
+import { SupportedMessage as OutGoingSupportedMessage } from './messages/outgoingMessages';
 import { UserManager } from './store/UserManager';
 import { InMemoryStore } from './InMemoryStore';
+import { OutGoingMessage } from './messages/outgoingMessages';
 
 const server = http.createServer((request: any, response: any) => {
    console.log(`${new Date()} Received request for ${request.url}`);
@@ -16,7 +18,7 @@ server.listen(8080, () => {
 
 const wsServer = new WebSocketServer({
    httpServer: server,
-   autoAcceptConnections: false
+   autoAcceptConnections: true
 });
 
 const userManager = new UserManager();
@@ -27,6 +29,7 @@ function originIsAllowed(origin: string): boolean {
 }
 
 wsServer.on('request', (request: WebSocketRequest) => {
+   console.log("inside on");
    if (!originIsAllowed(request.origin)) {
       request.reject();
       console.log(`${new Date()} Connection from origin ${request.origin} rejected.`);
@@ -60,9 +63,28 @@ function messageHandler(message: IncomingMessage, connection: connection) {
          return;
       }
       inMemoryStore.addChat(payload.roomId, payload.userId, user.name, payload.message);
+      const messagePayload: OutGoingMessage = {
+         type: OutGoingSupportedMessage.AddChat,
+         payload: {
+            roomId: payload.roomId,
+            message: payload.message,
+            name: user.name,
+            upvotes: 0
+         }
+      };
+      userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
    if (message.type === SupportedMessage.UpvoteMessage) {
       const payload = message.payload;
-      inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
+      const chat = inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
+      const messagePayload: OutGoingMessage = {
+         type: OutGoingSupportedMessage.UpdateChat,
+         payload: {
+            roomId: payload.roomId,
+            chatId: payload.chatId,
+            upvotes: chat?.upvotes.length
+         }
+      };
+      userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
 }
