@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    const ws = new WebSocket("ws://localhost:8080", ['echo-protocol']);
+    ws.onopen = function () {
+      ws.send(JSON.stringify({
+        type: "JOIN_ROOM",
+        payload: {
+          name: "Ashish",
+          userId: "1",
+          roomId: "1"
+        }
+      }));
+    }
+    function sendChat() {
+      ws.send(JSON.stringify({
+        type: "SEND_MESSAGE",
+        payload: {
+          message: "Hello there!!",
+          userId: "1",
+          roomId: "1"
+        }
+      }));
+    }
+  </script>
+  <title>real-time-chat</title>
+</head>
+
+<body>
+  <h1>Testing connection</h1>
+  <input type="text">
+  <button onclick="sendChat()">Send chat</button>
+</body>
+
+</html>
