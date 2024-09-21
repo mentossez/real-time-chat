@@ -1,6 +1,6 @@
 # real-time-chat
 
-## Simple chat application using websockets in Node.js
+## simple chat application using websockets in Node.js
 
 ### Install dependancies
 ```bash
