@@ -1,8 +1,16 @@
 # real-time-chat
 
-npx tsc -b
-node ./dist/index.js
+### Install dependancies
+```bash
+npm install
+```
 
-npm install serve
-cd ./frontend
-serve
+### Build
+```bash
+npx tsc -b
+```
+
+### Run
+```bash
+node ./dist/index.js
+```
