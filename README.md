@@ -14,3 +14,9 @@ npx tsc -b
 ```bash
 node ./dist/index.js
 ```
+
+### Run frontend
+```bash
+cd ./frontend
+serve
+```
