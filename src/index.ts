@@ -2,8 +2,8 @@ import { server as WebSocketServer, request as WebSocketRequest, connection as W
 import * as http from 'http';
 import { IncomingMessage, SupportedMessage } from './messages/incomingMessages';
 import { SupportedMessage as OutGoingSupportedMessage } from './messages/outgoingMessages';
-import { UserManager } from './store/UserManager';
-import { InMemoryStore } from './InMemoryStore';
+import { UserManager } from './UserManager';
+import { InMemoryStore } from './store/InMemoryStore';
 import { OutGoingMessage } from './messages/outgoingMessages';
 
 const server = http.createServer((request: any, response: any) => {
@@ -18,7 +18,7 @@ server.listen(8080, () => {
 
 const wsServer = new WebSocketServer({
    httpServer: server,
-   autoAcceptConnections: true
+   autoAcceptConnections: false
 });
 
 const userManager = new UserManager();
@@ -44,38 +44,38 @@ wsServer.on('request', (request: WebSocketRequest) => {
          messageHandler(message.utf8Data, connection);
       }
    });
-
-   connection.on('close', (reasonCode: any, description: any) => {
-      console.log(`${new Date()} Peer ${connection.remoteAddress} disconnected.`);
-   });
 });
 
-function messageHandler(message: IncomingMessage, connection: connection) {
-   if (message.type === SupportedMessage.JoinRoom) {
-      const payload = message.payload;
+function messageHandler(message: string, connection: connection) {
+   const parsedMessage = JSON.parse(message);
+   console.log(parsedMessage);
+   if (parsedMessage.type === SupportedMessage.JoinRoom) {
+      const payload = parsedMessage.payload;
+      console.log("user added " + message);
       userManager.addUser(payload.name, payload.userId, payload.roomId, connection);
    }
-   if (message.type === SupportedMessage.SendMessage) {
-      const payload = message.payload;
+   if (parsedMessage.type === SupportedMessage.SendMessage) {
+      const payload = parsedMessage.payload;
       const user = userManager.getUser(payload.userId, payload.roomId);
       if (!user) {
          console.log("User not found in db");
          return;
       }
-      inMemoryStore.addChat(payload.roomId, payload.userId, user.name, payload.message);
+      const chat = inMemoryStore.addChat(payload.roomId, payload.userId, user.name, payload.message);
       const messagePayload: OutGoingMessage = {
          type: OutGoingSupportedMessage.AddChat,
          payload: {
             roomId: payload.roomId,
             message: payload.message,
+            chatId: chat?.id,
             name: user.name,
             upvotes: 0
          }
       };
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
-   if (message.type === SupportedMessage.UpvoteMessage) {
-      const payload = message.payload;
+   if (parsedMessage.type === SupportedMessage.UpvoteMessage) {
+      const payload = parsedMessage.payload;
       const chat = inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
       const messagePayload: OutGoingMessage = {
          type: OutGoingSupportedMessage.UpdateChat,
@@ -85,6 +85,7 @@ function messageHandler(message: IncomingMessage, connection: connection) {
             upvotes: chat?.upvotes.length
          }
       };
+      console.log("outgoing upload message " + JSON.stringify(messagePayload));
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
 }

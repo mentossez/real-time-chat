@@ -1,4 +1,4 @@
-import { Chat, Store } from "./store/Store";
+import { Chat, Store } from "./Store";
 
 let globalChatId = 0;
 
@@ -32,17 +32,23 @@ export class InMemoryStore implements Store {
    }
 
    addChat(roomId: string, userId: string, name: string, message: string) {
-      const room = this.store.get(roomId);
-      if (!room) {
+      if (!this.store.get(roomId)) {
          this.initStore(roomId);
       }
-      room?.chats.push({
-         id: (globalChatId++).toString(),
+      const room = this.store.get(roomId);
+      if (!room) {
+         return;
+      }
+      const chat = {
+         id: (++globalChatId).toString(),
          userId,
          name,
          message,
          upvotes: []
-      });
+      };
+      room.chats.push(chat);
+      console.log("Room created " + JSON.stringify(room));
+      return chat;
    }
 
    upvote(roomId: string, userId: string, chatId: string) {
@@ -51,6 +57,9 @@ export class InMemoryStore implements Store {
          return;
       }
       const chat = room.chats.find(chat => chat.id === chatId);
+      if (chat?.upvotes.includes(userId)) {
+         return chat;
+      }
       chat?.upvotes.push(userId);
       return chat;
    }
