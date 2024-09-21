@@ -1,5 +1,7 @@
 # real-time-chat
 
+## Created real time chat using websockets
+
 ### Install dependancies
 ```bash
 npm install
