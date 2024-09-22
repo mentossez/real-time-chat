@@ -1,0 +1,21 @@
+<div class="chat-window">
+   <div class="chat-header">{{ windowHeader }}</div>
+   <div class="chat-body" [class.with-send-chat]="!hideSendChat">
+      <div *ngFor="let chat of chats" class="message row">
+         <span class="col-md-9" id="message-span">{{ chat }}</span>
+         <div class="vote-buttons col-md-3">
+            <button type="button" class="btn">
+               <span class="bi bi-hand-thumbs-up-fill"></span>
+               <span class="upvotes">0</span>
+            </button>
+            <button type="button" class="btn">
+               <span class="bi bi-hand-thumbs-down-fill"></span>
+            </button>
+         </div>
+      </div>
+   </div>
+   <div *ngIf="!hideSendChat" class="chat-footer">
+      <input type="text" placeholder="Type a message..." />
+      <button>Send</button>
+   </div>
+</div>
