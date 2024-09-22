@@ -1,6 +1,6 @@
 # real-time-chat
 
-## simple chat application using websockets in Node.js
+## simple chat application using websockets in Node.js, Angular
 
 ### Install dependancies
 ```bash
@@ -19,6 +19,7 @@ node ./dist/index.js
 
 ### Run frontend
 ```bash
-cd ./frontend
-serve
+cd ./chat-frontend
+npm install
+npm start
 ```
