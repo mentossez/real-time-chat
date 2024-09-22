@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ChatService } from '../chat.service';
 
 @Component({
    selector: 'app-chat-window',
@@ -11,7 +12,13 @@ export class ChatWindowComponent implements OnInit {
    @Input() chats!: Chat[];
    @Input() isMostLikedWindow!: boolean;
 
+   constructor(
+      private readonly chatService: ChatService
+   ) {}
+
    ngOnInit(): void {
+      const userId = Math.floor(Math.random() * 1000).toString();
+      this.chatService.initialiseUser(userId);
       this.chats = [
          {
             username: 'PewDiePie', message: 'Hello',
