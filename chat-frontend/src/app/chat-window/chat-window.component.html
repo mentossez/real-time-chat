@@ -1,18 +1,24 @@
 <div class="chat-window">
    <div class="chat-header">{{ windowHeader }}</div>
    <div class="chat-body" [class.with-send-chat]="!hideSendChat">
-      <div *ngFor="let chat of chats" class="message row">
-         <span class="col-md-9" id="message-span">{{ chat }}</span>
-         <div class="vote-buttons col-md-3">
-            <button type="button" class="btn">
-               <span class="bi bi-hand-thumbs-up-fill"></span>
-               <span class="upvotes">0</span>
-            </button>
-            <button type="button" class="btn">
-               <span class="bi bi-hand-thumbs-down-fill"></span>
-            </button>
+      <ng-container *ngFor="let chat of chats">
+         <div class="message row">
+            <span class="message-header">
+               <span class="user-name col-md-12">&#64;{{chat.username}}</span>
+               <button *ngIf="isMostLikedWindow" (click)="dismissChat(chat)" class="btn-close btn-close-white"></button>
+            </span>
+            <span class="col-md-9" id="message-span">{{ chat.message }}</span>
+            <div class="vote-buttons col-md-3">
+               <button type="button" class="btn" (click)="upvote(chat)">
+                  <span class="bi bi-hand-thumbs-up-fill"></span>
+                  <span class="upvotes">{{ chat.upvotes }}</span>
+               </button>
+               <button type="button" class="btn" (click)="downvote(chat)">
+                  <span class="bi bi-hand-thumbs-down-fill"></span>
+               </button>
+            </div>
          </div>
-      </div>
+      </ng-container>
    </div>
    <div *ngIf="!hideSendChat" class="chat-footer">
       <input type="text" placeholder="Type a message..." />
