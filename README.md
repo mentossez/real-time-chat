@@ -20,5 +20,6 @@ node ./dist/index.js
 ### Run frontend
 ```bash
 cd ./chat-frontend
+npm install
 npm start
 ```
