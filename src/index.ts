@@ -29,7 +29,6 @@ function originIsAllowed(origin: string): boolean {
 }
 
 wsServer.on('request', (request: WebSocketRequest) => {
-   console.log("inside on");
    if (!originIsAllowed(request.origin)) {
       request.reject();
       console.log(`${new Date()} Connection from origin ${request.origin} rejected.`);
@@ -48,17 +47,14 @@ wsServer.on('request', (request: WebSocketRequest) => {
 
 function messageHandler(message: string, connection: connection) {
    const parsedMessage = JSON.parse(message);
-   console.log(parsedMessage);
+   const payload = parsedMessage.payload;
    if (parsedMessage.type === SupportedMessage.JoinRoom) {
-      const payload = parsedMessage.payload;
-      console.log("user added " + message);
       userManager.addUser(payload.name, payload.userId, payload.roomId, connection);
    }
    if (parsedMessage.type === SupportedMessage.SendMessage) {
-      const payload = parsedMessage.payload;
       const user = userManager.getUser(payload.userId, payload.roomId);
       if (!user) {
-         console.log("User not found in db");
+         console.log("User not found");
          return;
       }
       const chat = inMemoryStore.addChat(payload.roomId, payload.userId, user.name, payload.message);
@@ -75,7 +71,6 @@ function messageHandler(message: string, connection: connection) {
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
    if (parsedMessage.type === SupportedMessage.UpvoteMessage) {
-      const payload = parsedMessage.payload;
       const chat = inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
       const messagePayload: OutGoingMessage = {
          type: OutGoingSupportedMessage.UpdateChat,
@@ -85,7 +80,7 @@ function messageHandler(message: string, connection: connection) {
             upvotes: chat?.upvotes.length
          }
       };
-      console.log("outgoing upload message " + JSON.stringify(messagePayload));
+      console.log(`user(${payload.userId}) upvoted chat(${payload.chatId}) in room(${payload.roomId})`);
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
 }

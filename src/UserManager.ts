@@ -31,6 +31,7 @@ export class UserManager {
          name,
          connection: ws
       });
+      console.log(`${name}(${userId}) joined in room(${roomId})`);
       ws.on('close', () => {
          this.removeUser(userId, roomId);
       });
@@ -38,8 +39,9 @@ export class UserManager {
 
    removeUser(userId: string, roomId: string) {
       const users = this.rooms.get(roomId)?.users;
+      const user = users?.find(user => user.id === userId);
       users?.filter(user => user.id !== userId);
-      console.log("user removed");
+      console.log(`${user?.name} disconnected!`);
    }
 
    getUser(userId: string, roomId: string) {
@@ -58,12 +60,7 @@ export class UserManager {
          return;
       }
       room.users.forEach(({ connection, id }) => {
-         // if (id === userId) {
-         //    console.log("test");
-         //    return;
-         // }
-         console.log("outgoing message " + JSON.stringify(message))
          connection.sendUTF(JSON.stringify(message))
-      })
+      });
    }
 }

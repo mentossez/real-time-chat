@@ -1,6 +1,6 @@
 import { Chat, Store } from "./Store";
 
-let globalChatId = 0;
+let globalChatId = 500;
 
 interface Room {
    roomId: string;
@@ -47,7 +47,7 @@ export class InMemoryStore implements Store {
          upvotes: []
       };
       room.chats.push(chat);
-      console.log("Room created " + JSON.stringify(room));
+      console.log(`chat is added in room(${roomId}) - ${JSON.stringify(chat)}`);
       return chat;
    }
 
