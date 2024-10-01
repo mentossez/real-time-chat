@@ -6,6 +6,7 @@ export interface Chat {
    name: string;
    message: string;
    upvotes: UserId[]; //who has upvoted what ?
+   isDismissed?: boolean;
 }
 
 export abstract class Store {

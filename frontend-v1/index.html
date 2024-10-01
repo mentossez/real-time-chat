@@ -47,7 +47,7 @@
     }
     function upvoteMessage(chatId) {
       ws.send(JSON.stringify({
-        type: "UPVOTE_MESSAGE",
+        type: "UPDATE_MESSAGE",
         payload: {
           userId: userId,
           roomId: '1',

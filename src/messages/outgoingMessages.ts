@@ -10,6 +10,7 @@ type MessagePayload = {
    name: string;
    message: string;
    upvotes: number;
+   isDismissed?: boolean;
 }
 
 export type OutGoingMessage = {

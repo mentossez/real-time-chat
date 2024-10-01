@@ -70,17 +70,24 @@ function messageHandler(message: string, connection: connection) {
       };
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
-   if (parsedMessage.type === SupportedMessage.UpvoteMessage) {
-      const chat = inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
+   if (parsedMessage.type === SupportedMessage.UpdateMessage) {
+      let chat;
+      if (payload.isDismissed) {
+         chat = inMemoryStore.dismissChat(payload.roomId, payload.chatId);
+      } else {
+         chat = inMemoryStore.upvote(payload.roomId, payload.userId, payload.chatId);
+      }
       const messagePayload: OutGoingMessage = {
          type: OutGoingSupportedMessage.UpdateChat,
          payload: {
             roomId: payload.roomId,
             chatId: payload.chatId,
-            upvotes: chat?.upvotes.length
+            upvotes: chat?.upvotes.length,
+            isDismissed: chat?.isDismissed ?? false
          }
       };
-      console.log(`user(${payload.userId}) upvoted chat(${payload.chatId}) in room(${payload.roomId})`);
+      const updateMsg = messagePayload.payload.isDismissed ? 'dismissed' : 'upvoted';
+      console.log(`user(${payload.userId}) ${updateMsg} chat(${payload.chatId}) in room(${payload.roomId})`);
       userManager.broadcast(payload.roomId, payload.userId, messagePayload);
    }
 }

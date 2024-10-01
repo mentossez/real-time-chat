@@ -3,7 +3,7 @@ import z from "zod";
 export enum SupportedMessage {
    JoinRoom = "JOIN_ROOM",
    SendMessage = "SEND_MESSAGE",
-   UpvoteMessage = "UPVOTE_MESSAGE",
+   UpdateMessage = "UPDATE_MESSAGE",
 };
 
 export type IncomingMessage = {
@@ -13,8 +13,8 @@ export type IncomingMessage = {
    type: SupportedMessage.SendMessage,
    payload: UserMessageType
 } | {
-   type: SupportedMessage.UpvoteMessage,
-   payload: UpvoteMessageType
+   type: SupportedMessage.UpdateMessage,
+   payload: UpdateMessageType
 };
 
 const InitMessages = z.object({
@@ -39,4 +39,4 @@ const UpvoteMessage = z.object({
    chatId: z.string()
 });
 
-export type UpvoteMessageType = z.infer<typeof UpvoteMessage>;
+export type UpdateMessageType = z.infer<typeof UpvoteMessage>;

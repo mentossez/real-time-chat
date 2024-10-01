@@ -63,4 +63,17 @@ export class InMemoryStore implements Store {
       chat?.upvotes.push(userId);
       return chat;
    }
+
+   dismissChat(roomId: string, chatId: string) {
+      const room = this.store.get(roomId);
+      if (!room) {
+         return;
+      }
+      const chat = room.chats.find(chat => chat.id === chatId);
+      if (!chat) {
+         return;
+      }
+      chat.isDismissed = true;
+      return chat;
+   }
 }
